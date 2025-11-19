@@ -6,12 +6,14 @@ import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import '../../models/truck_model.dart';
 import '../../models/player_model.dart';
 import '../../config/game_config.dart';
 import '../obstacles/car_component.dart';
 import '../../game/breaker_braker_game.dart';
+import 'truck_sprite_renderer.dart';
 
 class TruckComponent extends PositionComponent
     with HasGameReference, CollisionCallbacks {
@@ -44,6 +46,11 @@ class TruckComponent extends PositionComponent
   // Trailer connection
   Vector2? trailerPosition;
 
+  // Sprite rendering
+  ui.Image? _spriteSheet;
+  bool _useSpriteRendering = false;
+  static const String _spriteSheetPath = 'trucks/kenworth_w900_pristine.png';
+
   TruckComponent({
     required this.truckModel,
     required this.playerModel,
@@ -60,6 +67,16 @@ class TruckComponent extends PositionComponent
 
     // Set initial speed (auto-accelerate)
     targetSpeed = truckModel.baseSpeed;
+
+    // Try to load sprite sheet (fallback to placeholder if not available)
+    try {
+      _spriteSheet = await game.images.load(_spriteSheetPath);
+      _useSpriteRendering = true;
+      print('Loaded truck sprite sheet: $_spriteSheetPath');
+    } catch (e) {
+      print('Failed to load truck sprite sheet, using placeholder rendering: $e');
+      _useSpriteRendering = false;
+    }
 
     // Add collision hitbox
     add(RectangleHitbox(
@@ -153,8 +170,51 @@ class TruckComponent extends PositionComponent
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // PLACEHOLDER RENDERING - Replace with actual sprites later
-    _renderPlaceholder(canvas);
+    // Use sprite rendering if available, otherwise fall back to placeholder
+    if (_useSpriteRendering && _spriteSheet != null) {
+      _renderSprite(canvas);
+    } else {
+      _renderPlaceholder(canvas);
+    }
+  }
+
+  /// Render the truck using the pre-rendered sprite sheet
+  void _renderSprite(Canvas canvas) {
+    if (_spriteSheet == null) return;
+
+    // Get the frame index for the current rotation
+    // Note: angle is in radians, 0 = pointing up (north)
+    final frameIndex = TruckSpriteRenderer.getFrameIndexForAngle(angle);
+
+    // Calculate source rectangle (which part of sprite sheet to draw)
+    final framePos = TruckSpriteRenderer.getFramePosition(frameIndex);
+    final srcRect = Rect.fromLTWH(
+      framePos.x,
+      framePos.y,
+      TruckSpriteRenderer.spriteSize.toDouble(),
+      TruckSpriteRenderer.spriteSize.toDouble(),
+    );
+
+    // Destination rectangle (where to draw on screen)
+    // Center the sprite on the component
+    final dstRect = Rect.fromCenter(
+      center: Offset(0, -size.y / 2), // Center vertically in component
+      width: size.x,
+      height: size.y,
+    );
+
+    // Draw the sprite
+    canvas.drawImageRect(
+      _spriteSheet!,
+      srcRect,
+      dstRect,
+      Paint()..filterQuality = FilterQuality.high,
+    );
+
+    // Render damage overlay if needed
+    if (playerModel.truckDamage.totalDamage > 0) {
+      _renderDamageOverlay(canvas);
+    }
   }
 
   void _renderPlaceholder(Canvas canvas) {

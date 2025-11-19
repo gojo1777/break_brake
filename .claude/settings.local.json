@@ -13,7 +13,20 @@
       "WebFetch(domain:wreckfest2.thqnordic.com)",
       "WebSearch",
       "WebFetch(domain:www.dreamstime.com)",
-      "WebFetch(domain:en.wikipedia.org)"
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(where:*)",
+      "Bash(nul)",
+      "Bash(findstr:*)",
+      "Bash(\"C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe\" --version)",
+      "WebFetch(domain:sketchfab.com)",
+      "Bash(unzip:*)",
+      "Bash(\"C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe\" --background --python \"C:\\Users\\rober\\Git\\break_brake\\assets_source\\setup_truck_scene.py\")",
+      "WebFetch(domain:3dexport.com)",
+      "Bash(\"C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe\" --background \"C:\\Users\\rober\\Git\\break_brake\\assets_source\\trucks\\kenworth_w900\\kenworth_scene.blend\" --python \"C:\\Users\\rober\\Git\\break_brake\\assets_source\\test_render_single.py\")",
+      "Bash(\"C:\\Program Files\\Blender Foundation\\Blender 4.5\\blender.exe\" --background \"C:\\Users\\rober\\Git\\break_brake\\assets_source\\trucks\\kenworth_w900\\kenworth_scene.blend\" --python \"C:\\Users\\rober\\Git\\break_brake\\assets_source\\render_truck_16_angles.py\")",
+      "Bash(python:*)",
+      "Bash(rm \".\\nul\")",
+      "Bash(powershell -Command \"Remove-Item ''.\\nul'' -Force\")"
     ],
     "deny": [],
     "ask": []
