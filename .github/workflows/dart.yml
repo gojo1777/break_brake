@@ -1,38 +1,50 @@
-name: Build Break Brake Game
+name: Build Flutter APK
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main", "master"]
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      # Checkout code
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      # Setup Java (for Android)
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+          cache: gradle
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pygame pyinstaller
+      # Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
 
-    - name: Build Game EXE
-      run: |
-        # --onefile: එකම .exe ෆයිල් එකක් සාදයි
-        # --noconsole: Game එක open වෙනකොට කළු පාට console එකක් එන්නේ නැත
-        # --add-data: මෙහි image/sound folders තිබේ නම් ඒවා ඇතුළත් කළ යුතුය
-        pyinstaller --onefile --noconsole main.py
+      # Get dependencies
+      - name: Flutter Pub Get
+        run: flutter pub get
 
-    - name: Upload Game Executable
-      uses: actions/upload-artifact@v4
-      with:
-        name: Break-Brake-Game-Windows
-        path: dist/main.exe
+      # Fix Gradle Memory (optional but useful)
+      - name: Fix Gradle Memory
+        run: |
+          echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" >> android/gradle.properties
+
+      # Build the app
+      - name: Build Release APK
+        run: flutter build apk --release --no-tree-shake-icons --verbose
+
+      # Upload the APK
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
