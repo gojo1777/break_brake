@@ -1,4 +1,4 @@
-name: Build Python Game
+name: Build Break Brake Game
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # .exe එකක් හදන නිසා windows පාවිච්චි කිරීම පහසුයි
+    runs-on: windows-latest
 
     steps:
     - name: Checkout Code
@@ -23,15 +23,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pygame pyinstaller
-        # වෙනත් library තියෙනවා නම් ඒවා මෙතනට ඇතුලත් කරන්න
 
-    - name: Build EXE with PyInstaller
+    - name: Build Game EXE
       run: |
-        pyinstaller --onefile --windowed main.py 
-        # main.py වෙනුවට game එක run කරන ප්‍රධාන file එකේ නම දෙන්න
+        # --onefile: එකම .exe ෆයිල් එකක් සාදයි
+        # --noconsole: Game එක open වෙනකොට කළු පාට console එකක් එන්නේ නැත
+        # --add-data: මෙහි image/sound folders තිබේ නම් ඒවා ඇතුළත් කළ යුතුය
+        pyinstaller --onefile --noconsole main.py
 
-    - name: Upload EXE
+    - name: Upload Game Executable
       uses: actions/upload-artifact@v4
       with:
-        name: Car-Game-Windows
-        path: dist/*.exe
+        name: Break-Brake-Game-Windows
+        path: dist/main.exe
